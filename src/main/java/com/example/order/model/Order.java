@@ -1,4 +1,4 @@
-package com.example.order.orderService.entity;
+package com.example.order.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Document(collection = "orders")
@@ -20,6 +21,6 @@ public class Order {
     private BigDecimal totalAmount;
     private String status;
 
-    // Campos adicionais do pedido, como lista de produtos, etc.
+    private List<OrderItem> items;
 
 }

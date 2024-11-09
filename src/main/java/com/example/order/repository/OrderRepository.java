@@ -1,6 +1,6 @@
-package com.example.order.orderService.repository;
+package com.example.order.repository;
 
-import com.example.order.orderService.entity.Order;
+import com.example.order.model.Order;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
