@@ -1,7 +1,10 @@
 package com.example.order.consumer;
 
+import com.example.order.model.Order;
 import com.example.order.model.OrderItem;
 import com.example.order.service.OrderService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +26,9 @@ public class OrderConsumer {
     public void receiveOrder(Map<String, Object> orderData) {
         String orderId = (String) orderData.get("orderId");
 
-        List<Map<String, Object>> itemsData = (List<Map<String, Object>>) orderData.get("items");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, Object>> itemsData = objectMapper.convertValue(orderData.get("items"),
+                new TypeReference<List<Map<String, Object>>>() {});
         List<OrderItem> items = new ArrayList<>();
 
         for (Map<String, Object> itemData : itemsData) {
@@ -36,6 +41,7 @@ public class OrderConsumer {
         }
 
         // Processa o pedido com os itens
-        orderService.processOrder(orderId, items);
+        Order order = orderService.processOrder(orderId, items);
+        System.out.println("processed order: " + order.toString());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.example.order.config.RabbitMQConfig.ORDER_QUEUE;
 
@@ -41,9 +42,9 @@ public class OrderController {
     @PostMapping("/{id}")
     public ResponseEntity<String> createOrder(
             @PathVariable String id,
-            @RequestBody List<OrderItem> items) {
+            @RequestBody Order order) {
 
-        mountAndSendOrdersToQueue(id, items);
+        mountAndSendOrdersToQueue(id, order.getItems());
 
         return new ResponseEntity<>("Order sent to queue successfully!", HttpStatus.CREATED);
     }
@@ -52,7 +53,7 @@ public class OrderController {
     public ResponseEntity<String> createOrders(@RequestBody List<Order> orders) {
 
         for (Order order : orders) {
-            mountAndSendOrdersToQueue(order.getId(), order.getItems());
+            mountAndSendOrdersToQueue(order.getOrderId(), order.getItems());
         }
 
         return new ResponseEntity<>("Orders sent to queue successfully!", HttpStatus.CREATED);
@@ -63,16 +64,19 @@ public class OrderController {
         Map<String, Object> orderData = new HashMap<>();
         orderData.put("orderId", orderId);
         // Converte a lista de OrderItem para um formato adequado para a fila
-        List<Map<String, Object>> itemsData = items.stream().map(item -> {
-            Map<String, Object> itemData = new HashMap<>();
-            itemData.put("productId", item.getProductId());
-            itemData.put("name", item.getName());
-            itemData.put("quantity", item.getQuantity());
-            itemData.put("price", item.getPrice());
-            return itemData;
-        }).toList();
+        if (!Objects.isNull(items) && !items.isEmpty()) {
+            List<Map<String, Object>> itemsData = items.stream().map(item -> {
+                Map<String, Object> itemData = new HashMap<>();
+                itemData.put("productId", item.getProductId());
+                itemData.put("name", item.getName());
+                itemData.put("quantity", item.getQuantity());
+                itemData.put("price", item.getPrice());
+                return itemData;
+            }).toList();
 
-        orderData.put("items", itemsData);
+            orderData.put("items", itemsData);
+        }
+
 
         // Envia os dados para a fila
         rabbitTemplate.convertAndSend(ORDER_QUEUE, orderData);

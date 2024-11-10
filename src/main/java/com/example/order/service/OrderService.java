@@ -22,6 +22,7 @@ public class OrderService {
     @Transactional
     public Order processOrder(String orderId, List<OrderItem> items) {
 
+        System.out.println("Entering order: " + orderId);
         // Verifica se o pedido já existe
         Optional<Order> existingOrder = orderRepository.findByOrderId(orderId);
         if (existingOrder.isPresent()) {
@@ -36,8 +37,11 @@ public class OrderService {
         // Cria um novo pedido
         Order order = new Order();
         order.setOrderId(orderId);
+        order.setItems(items);
         order.setTotalAmount(totalAmount);
         order.setStatus("PENDING");
+
+        System.out.println("saving order: " + order.toString());
 
         return orderRepository.save(order);
     }
