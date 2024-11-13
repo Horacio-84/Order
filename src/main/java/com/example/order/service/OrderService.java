@@ -2,6 +2,7 @@ package com.example.order.service;
 
 import com.example.order.model.Order;
 import com.example.order.model.OrderItem;
+import com.example.order.model.enums.Status;
 import com.example.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,20 +30,29 @@ public class OrderService {
             return existingOrder.get();
         }
 
-        // Calcula o valor total do pedido
-        BigDecimal totalAmount = items.stream()
-                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         // Cria um novo pedido
         Order order = new Order();
         order.setOrderId(orderId);
         order.setItems(items);
-        order.setTotalAmount(totalAmount);
-        order.setStatus("PENDING");
+        order.setStatus(Status.PENDING.toString());
 
-        System.out.println("saving order: " + order.toString());
+        System.out.println("saving order: " + order);
 
         return orderRepository.save(order);
+    }
+
+    @Transactional
+    public void calculateTotal() {
+
+        List<Order> orders = orderRepository.findOrdersByStatus(Status.PENDING.toString());
+        for (Order order : orders) {
+            order.setTotalAmount(order.getItems().stream()
+                    .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+            order.setStatus(Status.COMPLETED.toString());
+        }
+
+        orderRepository.saveAll(orders);
     }
 }
