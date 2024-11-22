@@ -6,14 +6,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScheduledCalculator {
+public class ScheduledCalculation {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    // Injete o SumCalculator via construtor
-    public ScheduledCalculator(SumCalculator sumCalculator) {
-        this.sumCalculator = sumCalculator;
+    public ScheduledCalculation(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     // Método agendado para rodar a cada intervalo (ex.: a cada 5 minutos)
